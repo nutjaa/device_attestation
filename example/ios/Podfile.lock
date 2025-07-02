@@ -1,0 +1,22 @@
+PODS:
+  - device_attestation (0.1.0):
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - device_attestation (from `.symlinks/plugins/device_attestation/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  device_attestation:
+    :path: ".symlinks/plugins/device_attestation/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  device_attestation: 8d9ecf90cdecd44433c9266cfb21997204bfe7e8
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+
+PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
+
+COCOAPODS: 1.16.2
