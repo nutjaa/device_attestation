@@ -30,8 +30,9 @@ class DeviceAttestationDemo extends StatefulWidget {
 }
 
 class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
-  final DeviceAttestationPlatform _attestationService = DeviceAttestationPlatform.instance;
-  
+  final DeviceAttestationPlatform _attestationService =
+      DeviceAttestationPlatform.instance;
+
   String _status = 'Not initialized';
   String _attestationResult = '';
   String? _currentKeyId;
@@ -49,7 +50,9 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
       final supported = await _attestationService.isSupported();
       setState(() {
         _isSupported = supported;
-        _status = supported ? 'Device supports attestation' : 'Device does not support attestation';
+        _status = supported
+            ? 'Device supports attestation'
+            : 'Device does not support attestation';
       });
     } catch (e) {
       setState(() {
@@ -60,7 +63,7 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
 
   Future<void> _initialize() async {
     if (!_isSupported) return;
-    
+
     setState(() {
       _isLoading = true;
       _status = 'Initializing...';
@@ -69,7 +72,8 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
     try {
       final success = await _attestationService.initialize();
       setState(() {
-        _status = success ? 'Initialized successfully' : 'Initialization failed';
+        _status =
+            success ? 'Initialized successfully' : 'Initialization failed';
       });
     } catch (e) {
       setState(() {
@@ -84,7 +88,7 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
 
   Future<void> _performAttestation() async {
     if (!_isSupported) return;
-    
+
     setState(() {
       _isLoading = true;
       _status = 'Performing attestation...';
@@ -95,23 +99,24 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
       final challenge = 'challenge_${DateTime.now().millisecondsSinceEpoch}';
 
       print('Attestation challenge: $challenge');
-      
+
       final result = await _attestationService.attest(challenge);
 
       print('Attestation result: $result');
-      
+
       setState(() {
         _currentKeyId = result.keyId;
         _attestationResult = result.token;
         _status = 'Attestation successful! Type: ${result.type}';
       });
-      
+
       // Copy token to clipboard for easy testing
       await Clipboard.setData(ClipboardData(text: result.token));
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Attestation token copied to clipboard')),
+          const SnackBar(
+              content: Text('Attestation token copied to clipboard')),
         );
       }
     } catch (e) {
@@ -127,7 +132,7 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
 
   Future<void> _generateAssertion() async {
     if (!_isSupported || _currentKeyId == null) return;
-    
+
     setState(() {
       _isLoading = true;
       _status = 'Generating assertion...';
@@ -135,18 +140,20 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
 
     try {
       // Generate a unique challenge (in real app, this should come from your server)
-      final challenge = 'assertion_challenge_${DateTime.now().millisecondsSinceEpoch}';
-      
-      final result = await _attestationService.generateAssertion(challenge, _currentKeyId!);
-      
+      final challenge =
+          'assertion_challenge_${DateTime.now().millisecondsSinceEpoch}';
+
+      final result = await _attestationService.generateAssertion(
+          challenge, _currentKeyId!);
+
       setState(() {
         _attestationResult = result.token;
         _status = 'Assertion generated successfully!';
       });
-      
+
       // Copy token to clipboard for easy testing
       await Clipboard.setData(ClipboardData(text: result.token));
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Assertion token copied to clipboard')),
@@ -170,7 +177,7 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
         title: const Text('Device Attestation Demo'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,8 +191,8 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
                     Text(
                       'Status',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(_status),
@@ -200,24 +207,25 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _isLoading ? null : _initialize,
-              child: _isLoading 
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Initialize'),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Initialize'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: (_isLoading || !_isSupported) ? null : _performAttestation,
+              onPressed:
+                  (_isLoading || !_isSupported) ? null : _performAttestation,
               child: const Text('Perform Attestation'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: (_isLoading || !_isSupported || _currentKeyId == null) 
-                ? null 
-                : _generateAssertion,
+              onPressed: (_isLoading || !_isSupported || _currentKeyId == null)
+                  ? null
+                  : _generateAssertion,
               child: const Text('Generate Assertion'),
             ),
             const SizedBox(height: 16),
@@ -225,8 +233,8 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
               Text(
                 'Attestation Result:',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 8),
               Container(
@@ -255,8 +263,8 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
                     Text(
                       'How it works:',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     const Text('• Android: Uses Google Play Integrity API'),
@@ -267,6 +275,8 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
                 ),
               ),
             ),
+            const SizedBox(
+                height: 24), // Extra bottom padding for better scrolling
           ],
         ),
       ),
