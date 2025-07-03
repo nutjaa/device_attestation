@@ -18,8 +18,10 @@ abstract class DeviceAttestationPlatform extends PlatformInterface {
 
   /// Initialize the attestation service
   /// For iOS: This prepares App Attest service
-  /// For Android: This initializes Play Integrity API
-  Future<bool> initialize({String? keyId}) {
+  /// For Android: This initializes Play Integrity API with the provided project number
+  /// [projectNumber] - Google Cloud project number (Android only, required for Play Integrity API)
+  /// [keyId] - Optional key identifier (iOS only)
+  Future<bool> initialize({String? projectNumber, String? keyId}) {
     throw UnimplementedError('initialize() has not been implemented.');
   }
 
@@ -34,11 +36,8 @@ abstract class DeviceAttestationPlatform extends PlatformInterface {
   /// [challenge] - A unique challenge string from your server
   /// [keyId] - Key identifier used during initial attestation
   /// [clientData] - Additional client data to include in the assertion
-  Future<AttestationResult> generateAssertion(
-    String challenge, 
-    String keyId, 
-    {Map<String, dynamic>? clientData}
-  ) {
+  Future<AttestationResult> generateAssertion(String challenge, String keyId,
+      {Map<String, dynamic>? clientData}) {
     throw UnimplementedError('generateAssertion() has not been implemented.');
   }
 

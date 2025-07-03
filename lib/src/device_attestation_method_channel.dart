@@ -9,9 +9,10 @@ class MethodChannelDeviceAttestation extends DeviceAttestationPlatform {
   final methodChannel = const MethodChannel('device_attestation');
 
   @override
-  Future<bool> initialize({String? keyId}) async {
+  Future<bool> initialize({String? projectNumber, String? keyId}) async {
     try {
       final result = await methodChannel.invokeMethod<bool>('initialize', {
+        if (projectNumber != null) 'projectNumber': projectNumber,
         if (keyId != null) 'keyId': keyId,
       });
       return result ?? false;
@@ -27,14 +28,12 @@ class MethodChannelDeviceAttestation extends DeviceAttestationPlatform {
   @override
   Future<AttestationResult> attest(String challenge, {String? keyId}) async {
     try {
-      final result = await methodChannel.invokeMethod<Map<Object?, Object?>>(
-        'attest', 
-        {
-          'challenge': challenge,
-          if (keyId != null) 'keyId': keyId,
-        }
-      );
-      
+      final result =
+          await methodChannel.invokeMethod<Map<Object?, Object?>>('attest', {
+        'challenge': challenge,
+        if (keyId != null) 'keyId': keyId,
+      });
+
       if (result == null) {
         throw AttestationError(
           code: 'ATTESTATION_FAILED',
@@ -53,21 +52,16 @@ class MethodChannelDeviceAttestation extends DeviceAttestationPlatform {
   }
 
   @override
-  Future<AttestationResult> generateAssertion(
-    String challenge, 
-    String keyId, 
-    {Map<String, dynamic>? clientData}
-  ) async {
+  Future<AttestationResult> generateAssertion(String challenge, String keyId,
+      {Map<String, dynamic>? clientData}) async {
     try {
-      final result = await methodChannel.invokeMethod<Map<Object?, Object?>>(
-        'generateAssertion', 
-        {
-          'challenge': challenge,
-          'keyId': keyId,
-          if (clientData != null) 'clientData': clientData,
-        }
-      );
-      
+      final result = await methodChannel
+          .invokeMethod<Map<Object?, Object?>>('generateAssertion', {
+        'challenge': challenge,
+        'keyId': keyId,
+        if (clientData != null) 'clientData': clientData,
+      });
+
       if (result == null) {
         throw AttestationError(
           code: 'ASSERTION_FAILED',

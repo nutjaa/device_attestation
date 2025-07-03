@@ -70,7 +70,12 @@ class _DeviceAttestationDemoState extends State<DeviceAttestationDemo> {
     });
 
     try {
-      final success = await _attestationService.initialize();
+      // TODO: Replace with your actual Google Cloud project number
+      const projectNumber = "581285986647";
+
+      final success = await _attestationService.initialize(
+        projectNumber: projectNumber,
+      );
       setState(() {
         _status =
             success ? 'Initialized successfully' : 'Initialization failed';

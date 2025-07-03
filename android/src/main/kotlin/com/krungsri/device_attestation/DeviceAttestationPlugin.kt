@@ -19,6 +19,7 @@ class DeviceAttestationPlugin: FlutterPlugin, MethodChannel.MethodCallHandler {
     private lateinit var channel: MethodChannel
     private lateinit var context: Context
     private var integrityManager: IntegrityManager? = null
+    private var cloudProjectNumber: Long? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "device_attestation")
@@ -30,7 +31,8 @@ class DeviceAttestationPlugin: FlutterPlugin, MethodChannel.MethodCallHandler {
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {
         when (call.method) {
             "initialize" -> {
-                initialize(result)
+                val projectNumber = call.argument<String>("projectNumber")
+                initialize(projectNumber, result)
             }
             "attest" -> {
                 val challenge = call.argument<String>("challenge")
@@ -58,8 +60,20 @@ class DeviceAttestationPlugin: FlutterPlugin, MethodChannel.MethodCallHandler {
         }
     }
 
-    private fun initialize(result: MethodChannel.Result) {
+    private fun initialize(projectNumber: String?, result: MethodChannel.Result) {
         try {
+            // Set the cloud project number from Dart
+            if (projectNumber != null) {
+                cloudProjectNumber = projectNumber.toLongOrNull()
+                if (cloudProjectNumber == null) {
+                    result.error("INVALID_PROJECT_NUMBER", "Invalid project number format: $projectNumber", null)
+                    return
+                }
+                Log.d("DeviceAttestationPlugin", "Cloud project number set to: $cloudProjectNumber")
+            } else {
+                Log.w("DeviceAttestationPlugin", "No project number provided during initialization")
+            }
+            
             // Play Integrity doesn't require explicit initialization
             // Just verify that the service is available
             if (integrityManager != null) {
@@ -74,6 +88,15 @@ class DeviceAttestationPlugin: FlutterPlugin, MethodChannel.MethodCallHandler {
 
     private fun attest(challenge: String, result: MethodChannel.Result) {
         Log.d("DeviceAttestationPlugin", "Starting attestation with challenge: $challenge")
+        
+        // Check if cloud project number is configured
+        if (cloudProjectNumber == null || cloudProjectNumber == 0L) {
+            Log.e("DeviceAttestationPlugin", "Cloud project number is not configured. Please call initialize() with a valid project number first.")
+            result.error("CONFIGURATION_ERROR", 
+                "Cloud project number is not configured. Please call initialize() with your Google Cloud project number first.", 
+                null)
+            return
+        }
         
         // Check if running on emulator
         if (isEmulator()) {
@@ -97,6 +120,7 @@ class DeviceAttestationPlugin: FlutterPlugin, MethodChannel.MethodCallHandler {
                 
                 val integrityTokenRequest = IntegrityTokenRequest.builder()
                     .setNonce(challengeBase64)
+                    .setCloudProjectNumber(cloudProjectNumber ?: 0L)
                     .build()
 
                 Log.d("DeviceAttestationPlugin", "Requesting integrity token...")
